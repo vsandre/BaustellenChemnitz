@@ -1,0 +1,113 @@
+test cases for extractors.date
+======================
+
+    >>> from pprint import pprint
+    >>> from date import extract
+
+single day:
+    >>> pprint(extract('10.5.2013'))
+    {'since': datetime.date(2013, 5, 10), 'until': datetime.date(2013, 5, 10)}
+    >>> pprint(extract('1.5.13'))
+    {'since': datetime.date(2013, 5, 1), 'until': datetime.date(2013, 5, 1)}
+    >>> pprint(extract('1.5.'))
+    {'since': datetime.date(2015, 5, 1), 'until': datetime.date(2015, 5, 1)}
+    >>> pprint(extract('10.05.2013'))
+    {'since': datetime.date(2013, 5, 10), 'until': datetime.date(2013, 5, 10)}
+    >>> pprint(extract('am 10.05.2013'))
+    {'since': datetime.date(2013, 5, 10), 'until': datetime.date(2013, 5, 10)}
+
+time range:
+    >>> pprint(extract('von 10.05.2013 bis 15.06.2013'))
+    {'since': datetime.date(2013, 5, 10), 'until': datetime.date(2013, 6, 15)}
+    >>> pprint(extract('ab 10.05.2013 bis 15.06.2013'))
+    {'since': datetime.date(2013, 5, 10), 'until': datetime.date(2013, 6, 15)}
+    >>> pprint(extract('seit 10.05.2013 bis 15.06.2013'))
+    {'since': datetime.date(2013, 5, 10), 'until': datetime.date(2013, 6, 15)}
+    >>> pprint(extract('10.05.2013 - 15.06.2013'))
+    {'since': datetime.date(2013, 5, 10), 'until': datetime.date(2013, 6, 15)}
+    >>> pprint(extract('10.05.13 - 15.06.2013'))
+    {'since': datetime.date(2013, 5, 10), 'until': datetime.date(2013, 6, 15)}
+    >>> pprint(extract('10.05. - 15.06.2013'))
+    {'since': datetime.date(2013, 5, 10), 'until': datetime.date(2013, 6, 15)}
+    >>> pprint(extract('10.05.13 - 15.06.13'))
+    {'since': datetime.date(2013, 5, 10), 'until': datetime.date(2013, 6, 15)}
+    >>> pprint(extract('10.05. - 15.06.'))
+    {'since': datetime.date(2015, 5, 10), 'until': datetime.date(2015, 6, 15)}
+    >>> pprint(extract('10.05.2013 - 15.06.13'))
+    {'since': datetime.date(2013, 5, 10), 'until': datetime.date(2013, 6, 15)}
+    >>> pprint(extract('10.05.2014 - 15.06.2015'))
+    {'since': datetime.date(2014, 5, 10), 'until': datetime.date(2015, 6, 15)}
+
+negative time range with start date in the past:
+    >>> pprint(extract('10.10.2014 - 15.02.2014'))
+    {'since': datetime.date(2014, 10, 10), 'until': datetime.date(2015, 2, 15)}
+    >>> pprint(extract('10.10.14 - 15.02.2014'))
+    {'since': datetime.date(2014, 10, 10), 'until': datetime.date(2015, 2, 15)}
+    >>> pprint(extract('10.10.14 - 15.01.2014'))
+    {'since': datetime.date(2014, 10, 10), 'until': datetime.date(2015, 1, 15)}
+    >>> pprint(extract('10.10. - 15.02.2015'))
+    {'since': datetime.date(2014, 10, 10), 'until': datetime.date(2015, 2, 15)}
+    >>> pprint(extract('10.10. - 15.01.2015'))
+    {'since': datetime.date(2014, 10, 10), 'until': datetime.date(2015, 1, 15)}
+    >>> pprint(extract('10.1. - 15.2.2015'))
+    {'since': datetime.date(2015, 1, 10), 'until': datetime.date(2015, 2, 15)}
+    >>> pprint(extract('24.12. - 30.12.2014'))
+    {'since': datetime.date(2014, 12, 24), 'until': datetime.date(2014, 12, 30)}
+
+negative time range with start date in the future:
+    >>> pprint(extract('10.10.2015 - 15.02.2015'))
+    {'since': datetime.date(2015, 10, 10), 'until': datetime.date(2016, 2, 15)}
+
+start date:
+    >>> pprint(extract('ab 10.05.2013'))
+    {'since': datetime.date(2013, 5, 10), 'until': None}
+    >>> pprint(extract('seit 10.05.2013'))
+    {'since': datetime.date(2013, 5, 10), 'until': None}
+    >>> pprint(extract('ab 10.05.'))
+    {'since': datetime.date(2015, 5, 10), 'until': None}
+
+end date:
+    >>> pprint(extract('bis 10.05.2013'))
+    {'since': None, 'until': datetime.date(2013, 5, 10)}
+    >>> pprint(extract('bis 10.05.'))
+    {'since': None, 'until': datetime.date(2015, 5, 10)}
+
+given time:
+    >>> pprint(extract('30.11.2014, 14.00 - 18.30 Uhr'))
+    {'note': '14.00 - 18.30 Uhr',
+     'since': datetime.date(2014, 11, 30),
+     'until': datetime.date(2014, 11, 30)}
+
+estimated:
+    >>> pprint(extract('voraussichtlich ab Anfang März 2015 bis 06.08.2016'))
+    {'note': 'voraussichtliches Startdatum',
+     'since': datetime.date(2015, 3, 1),
+     'until': datetime.date(2016, 8, 6)}
+    >>> pprint(extract('voraussichtlich ab Anfang 2015 bis 06.08.2016'))
+    {'note': 'voraussichtliches Startdatum',
+     'since': datetime.date(2015, 1, 1),
+     'until': datetime.date(2016, 8, 6)}
+    >>> pprint(extract('voraussichtlich ab März 2015 bis 06.08.2016'))
+    {'note': 'voraussichtliches Startdatum',
+     'since': datetime.date(2015, 3, 1),
+     'until': datetime.date(2016, 8, 6)}
+    >>> pprint(extract('voraussichtlich ab 2015 bis 06.08.2016'))
+    {'note': 'voraussichtliches Startdatum',
+     'since': datetime.date(2015, 1, 1),
+     'until': datetime.date(2016, 8, 6)}
+    >>> pprint(extract('06.08.2015 bis voraussichtlich Ende März 2016'))
+    {'note': 'voraussichtliches Enddatum',
+     'since': datetime.date(2015, 8, 6),
+     'until': datetime.date(2016, 3, 31)}
+    >>> pprint(extract('06.08.2015 bis voraussichtlich Ende 2016'))
+    {'note': 'voraussichtliches Enddatum',
+     'since': datetime.date(2015, 8, 6),
+     'until': datetime.date(2016, 12, 31)}
+    >>> pprint(extract('06.08.2015 bis voraussichtlich November 2016'))
+    {'note': 'voraussichtliches Enddatum',
+     'since': datetime.date(2015, 8, 6),
+     'until': datetime.date(2016, 11, 30)}
+    >>> pprint(extract('06.08.2015 bis voraussichtlich 2016'))
+    {'note': 'voraussichtliches Enddatum',
+     'since': datetime.date(2015, 8, 6),
+     'until': datetime.date(2016, 12, 31)}
